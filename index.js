@@ -1,24 +1,45 @@
-const express = require('express')
-require('dotenv').config();
-const bodyParser = require('body-parser');
-const cors = require('cors');
-const MongoClient = require('mongodb').MongoClient;
+const express = require("express");
+require("dotenv").config();
+const bodyParser = require("body-parser");
+const cors = require("cors");
+const MongoClient = require("mongodb").MongoClient;
+const uri =
+  "mongodb+srv://sree:sree@cluster0.5trbi.mongodb.net/cinema-hall?retryWrites=true&w=majority";
 
-const app = express()
+const app = express();
 app.use(cors());
 app.use(bodyParser.json());
 
+const client = new MongoClient(uri, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+});
+client.connect((err) => {
+  const RecommendedMovies = client
+    .db("cinema-hall")
+    .collection("RecommendedMovies");
 
-    app.get('/',(req , res)=>{
-        res.send('runing database go first')
-    })
-  
-app.listen(process.env.PORT || 5000 , () => console.log("server side is running"))
+  app.get("/recommendedMovies", (req, res) => {
+    RecommendedMovies.find({}).toArray((err, document) => {
+      res.send(document);
+      console.log(document);
+    });
+  });
+  app.post("/recommendedMovies", (req, res) => {
+    const Movie = req.body;
+    RecommendedMovies.insertOne(Movie).then((result) => {
+      res.send(insertedCount);
+    });
+  });
+});
 
+app.get("/", (req, res) => {
+  res.send("runing database go first");
+});
 
-
-
-
+app.listen(process.env.PORT || 5000, () =>
+  console.log("server side is running")
+);
 
 // const express = require('express')
 // require('dotenv').config();
@@ -27,11 +48,9 @@ app.listen(process.env.PORT || 5000 , () => console.log("server side is running"
 // const MongoClient = require('mongodb').MongoClient;
 // const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.5trbi.mongodb.net/${process.env.DB_NAME}?retryWrites=true&w=majority`;
 
-
 // const app = express()
 // app.use(cors());
 // app.use(bodyParser.json());
-
 
 // const client = new MongoClient(uri, { useNewUrlParser: true , useUnifiedTopology: true });
 // client.connect(err => {
@@ -65,11 +84,11 @@ app.listen(process.env.PORT || 5000 , () => console.log("server side is running"
 //             .toArray((err , document) => {
 //                 res.send(document)
 //             })
-//         }) 
+//         })
 // });
 
 //     app.get('/',(req , res)=>{
 //         res.send('runing database go first')
 //     })
-  
+
 // app.listen(process.env.PORT || 8080)
